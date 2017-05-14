@@ -1,0 +1,56 @@
+extends ../layouts/main
+
+block content
+    main
+        form
+            fieldset
+                legend=add.title
+                lable(for='title')= pageProperties.title
+                br
+                input(name='title',type='text',placeholder=pageProperties.title)
+                p
+                lable(for='url')= pageProperties.url
+                br
+                input(name='url',type='text',placeholder=pageProperties.url)
+                p
+                lable(for='components')= pageProperties.components
+                br
+                select(name='components')
+                    each component in components
+                        option(value=component._id)= `${component.name} (${component.type})`
+                lable(for='position')= pageProperties.position
+                select(name='position')
+                p
+                button#add +
+                br
+                button(type='submit')= add.submit
+    script.
+        $('#add').click(function(event) {
+            event.preventDefault();
+            $(this).before($('select[name="components.component"]:first').clone()).before($('<p>'));
+        });
+        $('form').submit(function (event) {
+            event.preventDefault();
+            let form = $(this);
+            $.ajax({
+                type: 'post',
+                url: '',
+                data: form.serialize(),
+                success: function () {
+                    //location.replace('/admin/users');
+                },
+                error: function (err) {
+                    if(err.status == 400) {
+                        let errors = err.responseJSON;
+                        $('lable').each(function () {
+                            let name = $(this).attr('for');
+                            if (errors[name]) {
+                                $(this).find('~ p').text(errors[name].message);
+                            } else {
+                                $(this).find('~ p').empty();
+                            }
+                        });
+                    }
+                }
+            });
+        })

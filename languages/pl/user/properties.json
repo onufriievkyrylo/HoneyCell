@@ -1,0 +1,16 @@
+{
+  "_id":            "Osobisty ID",
+  "firstname":      "Imie",
+  "lastname":       "Nazwisko",
+  "email":          "Email",
+  "username":       "Login",
+  "password":       "Hasło",
+  "created":        "data utworzenia",
+  "role": {
+    "name":           "Grupa użytkowników",
+    "values": {
+      "user":           "Użytkownik",
+      "admin":          "Administrator"
+    }
+  }
+}

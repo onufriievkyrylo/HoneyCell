@@ -1,0 +1,6 @@
+extends admin/templates/layouts/main
+
+block content
+  h1= `${message} : ${code}` 
+  h2= error.status
+  pre #{error.stack}
