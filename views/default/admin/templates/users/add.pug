@@ -1,0 +1,60 @@
+extends ../layouts/main
+
+block content
+   main
+      form
+         fieldset
+            legend=add.add
+            lable(for='firstname')=userProperties.firstname
+            br
+            input(name='firstname',type='text',placeholder=userProperties.firstname)
+            p
+            lable(for='lastname')=userProperties.lastname
+            br
+            input(name='lastname',type='text',placeholder=userProperties.lastname)
+            p
+            lable(for='email')=userProperties.email
+            br
+            input(name='email',type='email',placeholder=userProperties.email)
+            p
+            lable(for='username')=userProperties.username
+            br
+            input(name='username',type='text',placeholder=userProperties.username)
+            p
+            lable(for='password')=userProperties.password
+            br
+            input(name='password',type='password',placeholder=userProperties.password)
+            p
+            lable(for="role")=userProperties.role.name
+            br
+            select(name="role")
+               each value, key in userProperties.role.values
+                  option(value=key)=value
+            p
+            button(type='submit')=add.submit
+   script.
+       $('form').submit(function (event) {
+           event.preventDefault();
+           let form = $(this);
+           $.ajax({
+               type: 'post',
+               url: '',
+               data: form.serialize(),
+               success: function () {
+                   location.replace('/admin/users');
+               },
+               error: function (err) {
+                   if(err.status == 400) {
+                       let errors = err.responseJSON;
+                       $('lable').each(function () {
+                               let name = $(this).attr('for');
+                           if (errors[name]) {
+                               $(this).find('~ p').text(errors[name].message);
+                           } else {
+                               $(this).find('~ p').empty();
+                           }
+                       });
+                   }
+               }
+           });
+       })

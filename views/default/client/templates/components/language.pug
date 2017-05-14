@@ -1,0 +1,8 @@
+select(name='language')
+    each name, code in available
+        option(value=code selected=(main==code))= name
+script.
+    $('select[name=language]').change(function(event) {
+        $.cookie('language', $(this).val());
+        location.reload();
+    });

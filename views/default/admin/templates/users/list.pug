@@ -1,0 +1,36 @@
+extends ../layouts/main
+
+block content
+    a(href='users/add')=list.add
+    table
+        thead
+            tr
+                th=userProperties.username
+                th=userProperties.email
+                th=userProperties.firstname
+                th=userProperties.lastname
+                th=userProperties.role.name
+                th=userProperties.created
+        tbody
+            each user in users
+                tr
+                    td(headers='username')=user.username
+                    td(headers='email')=user.email
+                    td(headers='firstname')=user.firstname
+                    td(headers='lastname')=user.lastname
+                    td(headers='role')=user.role
+                    td(headers='created')=user.created
+                    td
+                        button.remove=list.remove
+                        a(href=`users/edit/${user.username}`).edit=list.edit
+    script.
+        $('.remove').click(function () {
+            $.ajax({
+                type: 'delete',
+                url: 'users',
+                data: {username: $(this).parent().siblings('[headers=username]').text()},
+                success: function () {
+                    location.reload();
+                }
+            });
+        });

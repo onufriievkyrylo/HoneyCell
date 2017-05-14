@@ -1,0 +1,18 @@
+extends ../layouts/main
+
+block content
+    form
+        fieldset
+            legend=general.title
+            lable(for='title')=settingsProperties.title
+            br
+            input(name='title',type='text',placeholder=settingsProperties.title,value=settings.title)
+            br
+            lable(for='description')=settingsProperties.description
+            br
+            input(name='description',type='text',placeholder=settingsProperties.description,value=settings.description)
+            br
+            lable(for='keywords')=settingsProperties.keywords
+            br
+            input(name='keywords',type='text',placeholder=settingsProperties.keywords,value=settings.keywords)
+            br

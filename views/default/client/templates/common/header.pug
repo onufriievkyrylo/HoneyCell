@@ -1,0 +1,6 @@
+header.columns.small-12
+    if components
+        each component in components
+            if component.position == 'header'
+                != component.code
+    h1= common.header

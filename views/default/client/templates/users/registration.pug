@@ -1,0 +1,57 @@
+extends ../layouts/main
+
+append styles
+    link(rel="stylesheet",type="text/css",href="/default/dist/components/form.min.css")
+block content
+    main
+        form.ui.form
+            .two.fields
+                .field
+                    label(for='firstname')= userProperties.firstname
+                    input(name='firstname',type='text',placeholder=userProperties.firstname)
+                .field
+                    label(for='lastname')= userProperties.lastname
+                    input(name='lastname',type='text',placeholder=userProperties.lastname)
+            .required.field
+                label(for='username')=userProperties.username
+                input(name='username',type='text',placeholder=userProperties.username)
+            .required.field
+                label(for='email')=userProperties.email
+                input(name='email',type='email',placeholder=userProperties.email)
+            .required.field
+                label(for='password')=userProperties.password
+                input(name='password',type='password',placeholder=userProperties.password)
+            .ui.primary.submit.button= registration.submit
+    script.
+        $(function () {
+            $('form').form({
+                inline: true,
+                onInvalid: function(formErrors, fields){
+                    console.log('fail');
+                }
+                })
+        })
+        $('form').submit(function (event) {
+            event.preventDefault();
+            let form = $(this);
+            $.ajax({
+                type: 'post',
+                url: '/registration',
+                data: form.serialize(),
+                success: function () {
+                    location.replace('/');
+                },
+                error: function (err) {
+                    if(err.status == 400) {
+                        let errors = err.responseJSON;
+                        $('input').each(function() {
+                            let field = $(this).attr('name')
+                            if (field in errors)
+                                $('form').form('add prompt', field, errors[field].message)
+                            else
+                                $('form').form('remove prompt', field)
+                        })
+                    }
+                }
+            });
+        })

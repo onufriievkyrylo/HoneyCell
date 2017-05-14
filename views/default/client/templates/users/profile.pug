@@ -1,0 +1,29 @@
+extends ../layouts/simple
+
+block content
+  h1= `${profile.title} ${user.username}`
+  if owner
+    a(href=`/profile/${user.username}/edit`)=profile.edit
+  br
+  table
+    tr
+      td=userProperties._id
+      td=user._id
+    tr
+      td=userProperties.created
+      td=user.created
+    tr
+      td=userProperties.username
+      td=user.username
+    tr
+      td=userProperties.role.name
+      td=userProperties.role.values[user.role]
+    tr
+      td=userProperties.firstname
+      td=user.firstname
+    tr
+      td=userProperties.lastname
+      td=user.lastname
+    tr
+      td=userProperties.email
+      td=user.email

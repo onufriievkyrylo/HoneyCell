@@ -1,0 +1,42 @@
+extends ./layouts/main
+
+block content
+    style.
+        body > .grid {
+        height: 100%;
+        }
+    .ui.middle.aligned.center.aligned.grid
+        .column.twelve.wide.phone.eight.wide.tablet.five.wide.computer
+            h2.ui.teal.image.header
+                img.image(src='assets/images/logo.png')
+                .content= title
+            form.ui.large.form
+                .ui.error.message
+                .ui.stacked.segment
+                    .field
+                        .ui.left.icon.input
+                            i.user.icon
+                            input(type='text', name='username', placeholder=username)
+                    .field
+                        .ui.left.icon.input
+                            i.lock.icon
+                            input(type='password', name='password', placeholder=password)
+                    button.ui.fluid.large.primary.submit.button= submit
+    script.
+        $('form').submit(function(event){
+            event.preventDefault();
+            let form = $(this).serialize();
+            $.ajax({
+                type: 'post',
+                url: '/admin/login',
+                data: form,
+                success: function(){
+                    location.reload();
+                },
+                error: function(err){
+                    $('form').form('add errors', {username: err.responseText})
+                        .form('add prompt', 'password')
+                        .form('add prompt', 'username')
+                }
+            });
+        });

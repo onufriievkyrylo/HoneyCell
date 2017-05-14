@@ -1,0 +1,26 @@
+{
+  "firstname": {
+    "alpha":     "Imię może składać się tylko z liter"
+  },
+  "lastname": {
+    "alpha":     "Nazwisko może składać się tylko z liter"
+  },
+  "email": {
+    "email":     "Wprowadź prawidłowy adres email",
+    "unique":    "Użytkownik z tym email już zarejestrowany",
+    "required":  "To pole jest wymagane"
+  },
+  "username": {
+    "latin":     "Login użytkownika może składać się wyłącznie z liter lytynskyh, cyfr, podkreślenia i kropki",
+    "unique":    "Niestety, ten login jest zajęty",
+    "required":  "To pole jest wymagane"
+  },
+  "password": {
+    "required":  "To pole jest wymagane",
+    "minlength": "Hasło jest za krótkie",
+    "security":  "Hasło musi składać się z liter i cyfr"
+  },
+  "role": {
+    "enum":      "Niedopuszczalna wartość"
+  }
+}

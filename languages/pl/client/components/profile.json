@@ -1,0 +1,10 @@
+{
+    "authorization":    "Autoryzacja",
+    "registration":     "Rejestracja",
+    "login":            "Zaloguj",
+    "logout":           "Wyloguj",
+    "username":         "Login",
+    "password":         "Hasło",
+    "rememberme":       "Zapamiętaj mnie",
+    "profile":          "Profil"
+}
