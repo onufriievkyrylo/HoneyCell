@@ -1,5 +1,5 @@
 const mongoose = require('mongoose'),
-    validator = require('mongoose-validator'),
+    validator = require('validator'),
     uniqueValidator = require('mongoose-unique-validator'),
     bcrypt = require('bcrypt'),
     SALT_WORK_FACTOR = 10;
@@ -7,53 +7,47 @@ const mongoose = require('mongoose'),
 let userSchema = mongoose.Schema({
     firstname: {
         type: String,
-        validate: validator({
-            validator: 'matches',
-            passIfEmpty: true,
-            arguments: /^[^!-@\[-`{-¿\s]+$/,
-            reason: 'alpha'
-        })
+        validate: {
+            validator: value => !value || /^[^!-@\[-`{-¿\s]+$/.test(value),
+            type: 'alpha'
+        }
     },
     lastname: {
         type: String,
-        validate: validator({
-            validator: 'matches',
-            passIfEmpty: true,
-            arguments: /^[^!-@\[-`{-¿\s]+$/,
-            reason: 'alpha'
-        })
+        validate: {
+            validator: value => !value || /^[^!-@\[-`{-¿\s]+$/.test(value),
+            type: 'alpha'
+        }
     },
     email: {
         type: String,
         lowercase: true,
         required: true,
         unique: true,
-        validate: validator({
-            validator: 'isEmail',
-            reason: 'email'
-        })
+        validate: {
+            validator: value => validator.isEmail(value),
+            type: 'email'
+        }
     },
     username: {
         type: String,
         required: true,
         unique: true,
         uniqueCaseInsensitive: true,
-        validate: validator({
-            validator: 'matches',
-            arguments: /^[\w._]+$/,
-            reason: 'latin'
-        })
+        validate: {
+            validator: value => /^[\w.]+$/.test(value),
+            type: 'latin'
+        }
     },
     password: {
         type: String,
         minlength: 6,
         select: false,
         required: true,
-        validate: validator({
-            validator: 'matches',
-            arguments: /^(?=.*\d)(?=.*[a-z]).*$/i,
-            reason: 'security'
-        })
+        validate: {
+            validator: value => /^(?=.*\d)(?=.*[a-z]).*$/i.test(value),
+            type: 'security'
+        }
     },
     role: {
         type: String,

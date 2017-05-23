@@ -1,0 +1,48 @@
+extends ./layouts/simple
+
+block content
+    .column
+        h2.ui.image.header.inverted
+            img.image(src='/default/img/white-logo.png')
+            .content= title
+        #login.ui.segment
+            form.ui.big.form
+                .ui.error.message
+                .field
+                    .ui.left.icon.input
+                        i.user.icon
+                        input(type='text', name='username', placeholder=username)
+                .field
+                    .ui.left.icon.input
+                        i.lock.icon
+                        input(type='password', name='password', placeholder=password)
+                button.ui.fluid.big.yellow.submit.button= submit
+    script.
+        $(function(){
+            $.fn.form.settings.templates.error = function(errors){
+                let html = $('<div class="ui list">');
+                $.each(errors, function(index, value) {
+                    html.append($('<div class="item">').text(value));
+                });
+                return $(html);
+            }
+        })
+        $('form').submit(function(event){
+            event.preventDefault();
+            let form = $(this).serialize();
+            $.ajax({
+                type: 'post',
+                url: '/admin/login',
+                data: form,
+                success: function(){
+                    location.reload();
+                },
+                error: function(err){
+                    $('form').form('add errors', {username: err.responseText});
+                    $('#login').addClass('shake');
+                    setTimeout(function(){
+                        $('#login').removeClass('shake');
+                    },1000)
+                }
+            });
+        });

@@ -1,0 +1,18 @@
+.ui.selection.dropdown
+  input(type='hidden', name='language')
+  i.dropdown.icon
+  .text
+    i.flag(class=main.split('-')[1].toLowerCase())
+    = available[main]
+  .menu
+    each name, code in available
+        .item(data-value=code, class=main==code?'active selected':'')
+            i.flag(class=code.split('-')[1].toLowerCase())
+            = name
+script.
+    $('.ui.dropdown').dropdown({
+        onChange: function(value){
+            $.cookie('language', value);
+            location.reload();
+        }
+    });

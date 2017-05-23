@@ -1,0 +1,65 @@
+extends ../layouts/main
+
+block menu right
+    .item
+        #add.rounded.ui.button
+            i.add.icon
+            = add.submit
+
+block content
+    h1.ui.medium.header= add.title
+    form.ui.form
+        .two.fields
+            .field
+                label(for='firstname')= userProperties.firstname
+                input(name='firstname',type='text',placeholder=userProperties.firstname)
+            .field
+                label(for='lastname')= userProperties.lastname
+                input(name='lastname',type='text',placeholder=userProperties.lastname)
+        .required.field
+            label(for='username')=userProperties.username
+            input(name='username',type='text',placeholder=userProperties.username)
+        .required.field
+            label(for='email')=userProperties.email
+            input(name='email',type='email',placeholder=userProperties.email)
+        .required.field
+            label(for='password')=userProperties.password
+            input(name='password',type='password',placeholder=userProperties.password)
+        .field
+            label(for='role')=userProperties.role.name
+            select.ui.dropdown(name='role')
+                each value, key in userProperties.role.values
+                    option(value=key)= value
+
+append scripts body
+   script.
+        $('form').form({inline: true})
+        $('select[name="role"]').dropdown();
+        $('#add').click(function(){
+            $('form').form('submit');
+        })
+        $('form').submit(function (event) {
+            event.preventDefault();
+            let form = $(this);
+            $.ajax({
+                type: 'post',
+                url: '',
+                data: form.serialize(),
+                success: function () {
+                    location.replace('/admin/users');
+                },
+                error: function (err) {
+                    if(err.status == 400) {
+                        let errors = err.responseJSON;
+                        console.log(errors);
+                        $('form .field [name]').each(function() {
+                            let field = $(this).attr('name')
+                            if (errors[field])
+                                $('form').form('add prompt', field, errors[field].message)
+                            else
+                                $('form').form('remove prompt', field)
+                        })
+                    }
+                }
+            });
+        })

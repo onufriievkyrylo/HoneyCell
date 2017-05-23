@@ -1,0 +1,66 @@
+html, body {
+  height: 100%;
+  background: #efc95d; }
+
+.column {
+  width: 450px !important; }
+
+.shake {
+  animation: shake .8s ease 1; }
+
+#menu {
+  height: 60px;
+  border-radius: 0;
+  margin: 0; }
+  #menu #sidebar-toggle::before {
+    content: ' '; }
+  #menu .item::before {
+    content: none; }
+  #menu #logo {
+    width: 250px;
+    justify-content: center;
+    border-radius: 0;
+    background-color: #e29e00;
+    font-size: 1.6rem;
+    font-weight: bold;
+    text-transform: none; }
+    #menu #logo img {
+      width: 47px;
+      margin-right: 1rem; }
+  #menu #search input[type="search"] {
+    border: none;
+    border-radius: 99px; }
+  #menu .rounded {
+    border-radius: 99px;
+    background-color: white; }
+  #menu #admin {
+    font-weight: bold; }
+
+#panel {
+  max-height: calc(100% - 60px);
+  background-color: whitesmoke; }
+
+#sidebar {
+  width: 250px; }
+
+#main {
+  width: 100%;
+  will-change: transform;
+  transition: transform .5s ease, width .5s ease; }
+
+#length {
+  min-width: 2rem;
+  margin-right: 1rem;
+  margin-left: 1rem; }
+
+.ui.sortable.table thead th {
+  border: none; }
+  .ui.sortable.table thead th:hover, .ui.sortable.table thead th.sorted, .ui.sortable.table thead th.sorted:hover {
+    background: none; }
+  .ui.sortable.table thead th.sorted::after {
+    color: black; }
+  .ui.sortable.table thead th::after {
+    display: inline-block;
+    content: '\f0dc';
+    color: rgba(40, 40, 40, 0.3);
+    float: right; }

@@ -5,7 +5,7 @@ const pug = require('pug'),
 module.exports = (request) => {
     return Settings.get('localization.languages')
         .then(settings => {
-            return pug.renderFile(`${__base}/views/${request.theme}/client/templates/components/language.pug`, {
+            return pug.renderFile(`${__base}/views/${request.theme}/client/components/language.pug`, {
                 main: request.language,
                 available: Utils.getLanguageNames(settings.localization.languages.available)
             })

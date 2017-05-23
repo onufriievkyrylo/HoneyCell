@@ -1,0 +1,103 @@
+doctype
+html
+	head
+		title= title
+		block styles
+			link(rel="stylesheet",type="text/css",href="/default/semantic/semantic.css")
+			link(rel="stylesheet",type="text/css",href="/default/css/admin.css")
+		block scripts head
+			script(src="https://code.jquery.com/jquery-3.1.1.min.js",integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=",crossorigin="anonymous")
+			script(src="/default/semantic/semantic.min.js")
+	body
+		#menu.ui.top.menu.inverted.yellow
+			#logo.item
+				img(src='/default/img/white-logo.png')
+				| HoneyCell
+			a#sidebar-toggle.icon.item
+				i.big.sidebar.icon
+			block menu left
+				#search.item
+					.ui.icon.input
+						input(type='search',placeholder=common.search)
+						i.search.icon
+			.right.menu
+				block menu right
+					.item
+						#create.rounded.ui.floating.dropdown.button
+							i.plus.icon
+							= common.create
+							i.dropdown.icon
+							.menu
+								.item Article
+								.item User
+								.item Post
+								.item Chat
+				.item
+					#admin.ui.floating.dropdown
+						img.ui.avatar.image(src='https://image.flaticon.com/icons/png/128/145/145849.png')
+						= admin.firstname && admin.lastname ? `${admin.firstname} ${admin.lastname}` : admin.username
+						i.dropdown.icon
+						.menu
+							.item Choice 3
+							.item Choice 3
+							.divider
+							a#logout.item
+								i.sign.out.icon
+								= common.admin.logout
+		#panel
+			#sidebar.ui.left.vertical.inverted.sidebar.menu.massive
+				.item
+					.header= common.main
+					.menu
+						a.item(href='/admin')= common.home
+							i.home.icon
+						a.item(href='/admin/users')= common.users
+							i.users.icon
+						a.item(href='/admin/settings')= common.settings
+							i.settings.icon
+				.item
+					.header= common.modules
+					.menu
+						a.item(href='/admin')= common.home
+							i.home.icon
+						a.item(href='/admin/users')= common.users
+							i.users.icon
+						a.item(href='/admin/settings')= common.users
+							i.settings.icon
+						a.item(href='/admin')= common.home
+							i.home.icon
+						a.item(href='/admin/users')= common.users
+							i.users.icon
+			#main.pusher
+				.ui.segment
+					block content
+	block scripts body
+		script.
+			$('#admin').dropdown();
+			$('#sidebar')
+				.sidebar({
+					dimPage: false,
+					transition: 'push',
+					mobileTransition: 'push',
+					closable: false,
+					context : $('#panel'),
+					onVisible: function(){
+						$('#main').css('width', 'calc(100% - 250px)')
+					},
+					onHide: function(){
+						$('#main').css('width', '100%')
+					}
+				})
+				.sidebar('attach events', '#sidebar-toggle');
+			$(function() {
+				$(`.menu a[href="${location.pathname}"]`).addClass('active');
+			})
+			$('#logout').click(function(){
+				$.ajax({
+					method: 'post',
+					url: '/admin/logout',
+					success: function() {
+						location.reload();
+					}
+				});
+			})

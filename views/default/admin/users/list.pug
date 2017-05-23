@@ -1,0 +1,134 @@
+extends ../layouts/main
+
+block menu right
+    .item
+        a#create.ui.button.rounded(href='users/add')
+            i.user.icon
+            = list.add
+
+block content
+    h1.ui.medium.header= title
+    span.ui.sub.header= list.show
+    #length.ui.selection.dropdown
+        input(type='hidden', name='length')
+        i.dropdown.icon
+        .text= table.length
+        .menu
+            .item(data-value=3, class=table.length == 3 ? 'active selected' : '') 3
+            .item(data-value=10, class=table.length == 10 ? 'active selected' : '') 10
+            .item(data-value=25, class=table.length == 25 ? 'active selected' : '') 25
+            .item(data-value=50, class=table.length == 50 ? 'active selected' : '') 50
+    table.ui.sortable.very.basic.table
+        thead
+            tr
+                th(headers='username' class=table.sort.column=='username'? `sorted ${table.sort.direction}` : '')= userProperties.username
+                th(headers='email' class=table.sort.column=='email'? `sorted ${table.sort.direction}` : '')= userProperties.email
+                th(headers='firstname' class=table.sort.column=='firstname'? `sorted ${table.sort.direction}` : '')= userProperties.firstname
+                th(headers='lastname' class=table.sort.column=='lastname'? `sorted ${table.sort.direction}` : '')= userProperties.lastname
+                th(headers='role' class=table.sort.column=='role'? `sorted ${table.sort.direction}` : '')= userProperties.role.name
+                th(headers='created' class=table.sort.column=='created'? `sorted ${table.sort.direction}` : '')= userProperties.created
+        tbody
+            each user in users
+                tr
+                    td(headers='username')= user.username
+                    td(headers='email')= user.email
+                    td(headers='firstname')= user.firstname
+                    td(headers='lastname')= user.lastname
+                    td(headers='role')= user.role
+                    td(headers='created')= user.created
+                    td.collapsing
+                        .ui.red.icon.button.remove(data-value=user.username): i.trash.icon
+                        a.ui.yellow.icon.button(href=`users/edit/${user.username}`): i.edit.icon
+        if table.pagetotal > 1
+            include ../../mixins/pagination
+            tfoot
+                tr
+                    th(colspan=7)
+                        .ui.right.floated.pagination.menu
+                            if table.page != 1
+                                a.icon.item(data-value=table.page-1): i.left.chevron.icon
+                            +pagination(table.page, table.pagetotal, 5)
+                            if table.page != table.pagetotal
+                                a.icon.item(data-value=table.page+1): i.right.chevron.icon
+append scripts body
+    script.
+        var sort = "!{table.sort.direction == 'descending' ? '-': ''}!{table.sort.column}",
+            length = !{table.length},
+            page = !{table.page};
+        function updateTable(){
+            $.ajax({
+                type: 'post',
+                url: `/admin/users/?sort=${sort}&page=${page}&length=${length}`,
+                success: function(data) {
+                    $('tbody').empty();
+                    for(let user of data.users)
+                        $('tbody').append($('<tr>')
+                        .append($('<td headers="username">').text(user.username))
+                        .append($('<td headers="email">').text(user.email))
+                        .append($('<td headers="firstname">').text(user.firstname))
+                        .append($('<td headers="lastname">').text(user.lastname))
+                        .append($('<td headers="role">').text(user.role))
+                        .append($('<td headers="created">').text(user.created))
+                        .append($('<td class="collapsing">')
+                        .html(`<div class="ui red icon button remove"><i class="trash icon"></i></div><a class="ui yellow icon button edit" href="users/edit/${user.username}"><i class="edit icon"></i></a>`)))
+                    $('tfoot').remove();
+                    if (data.table.pagetotal > 1){
+                        $('table')
+                        .append($('<tfoot>')
+                        .append($('<tr>')
+                        .append($('<th colspan="7">')
+                        .append(function() {
+                            let pages = $('<div class="ui right floated pagination menu">'),
+                            length = Math.min(5, data.table.pagetotal),
+                            limit = data.table.pagetotal - length + 1,
+                            start = Math.max(1, Math.min(limit, data.table.page - (length>>1)))
+                            for(let page = start; page < data.table.page; ++page)
+                                pages.append($(`<a class='item' data-value='${page}'>`).text(page))
+                            pages.append($(`<a class='item active' data-value='${data.table.page}'>`).text(data.table.page))
+                            for(let page = data.table.page + 1; page < start + length; ++page)
+                                pages.append($(`<a class='item' data-value='${page}'>`).text(page))
+                            if(data.table.page != 1)
+                                pages.prepend($(`<a class='icon item' data-value='${data.table.page - 1}'>`).append($('<i class="left chevron icon">')))
+                            if(data.table.page != data.table.pagetotal)
+                                pages.append($(`<a class='icon item' data-value='${data.table.page + 1}'>`).append($('<i class="right chevron icon">')))
+                            return pages
+                        })
+                        )))
+                    }
+                }
+            })
+        }
+        $('table').on('click', '.pagination a:not(.active)', function() {
+            page = $(this).attr('data-value');
+            updateTable();
+        })
+        $('thead th').click(function() {
+            sort = $(this).attr('headers');
+            if($(this).hasClass('sorted'))
+                if($(this).hasClass('ascending')){
+                    $(this).removeClass('ascending').addClass('descending');
+                    sort = '-' + sort;
+                } else
+                    $(this).removeClass('descending').addClass('ascending');
+            else{
+                $(this).siblings('.sorted').removeClass('sorted descending ascending');
+                $(this).addClass('sorted ascending');
+            }
+            updateTable();
+        })
+        $('#length').dropdown({
+            onChange: function(value) {
+                length = value;
+                updateTable();
+            }
+        });
+        $('.remove').click(function () {
+            $.ajax({
+                type: 'delete',
+                url: '',
+                data: {username: $(this).attr('data-value')},
+                success: function () {
+                    updateTable();
+                }
+            });
+        });

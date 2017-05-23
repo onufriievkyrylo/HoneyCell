@@ -14,7 +14,7 @@
     "express": "~4.14.1",
     "express-session": "^1.15.1",
     "joi": "^9.2.0",
-    "mongoose": "^4.8.5",
+    "mongoose": "^4.9.9",
     "mongoose-unique-validator": "^1.0.4",
     "mongoose-validator": "^1.2.5",
     "morgan": "~1.7.0",
@@ -22,6 +22,7 @@
     "nodemailer": "^3.1.5",
     "pug": "^2.0.0-beta.12",
     "serve-favicon": "~2.3.2",
-    "uuid": "^3.0.1"
+    "uuid": "^3.0.1",
+    "validator": "^7.0.0"
   }
 }

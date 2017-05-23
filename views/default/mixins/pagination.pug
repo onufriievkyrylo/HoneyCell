@@ -1,0 +1,9 @@
+mixin pagination(current, total, length)
+    - length = Math.min(length, total)
+    - let limit = total - length + 1
+    - let start = Math.max(1, Math.min(limit, current - (length>>1)))
+    - for(let page = start; page < current; ++page)
+        a.item(data-value=page)= page
+    a.item.active(data-value=current)= current
+    - for(let page = current + 1; page < start + length; ++page)
+        a.item(data-value=page)= page

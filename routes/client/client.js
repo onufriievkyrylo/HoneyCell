@@ -39,7 +39,7 @@ router.use(async (req, res, next) => {
 })
 
 router.get('/', (req, res) => {
-    res.render(`${req.theme}/client/templates/index`, {
+    res.render(`${req.theme}/client/index`, {
         title: req.title,
         pageLanguage: req.language,
         availableLanguages: ['uk', 'pl'],
@@ -51,7 +51,8 @@ router.get('/', (req, res) => {
 router.get('/registration', (req, res) => {
     res.locals.registration = load.language(req.language, 'client/users/registration');
     res.locals.title = res.locals.registration.title;
-    res.render(`${req.theme}/client/templates/users/registration`, {
+    res.render(`${req.theme}/client/users/registration`, {
+        errors: load.language(req.language, 'models/user/errors'),
         common: load.language(req.language, 'common'),
         userProperties: load.language(req.language, 'models/user/properties'),
         components: req.components
@@ -60,6 +61,7 @@ router.get('/registration', (req, res) => {
 
 router.post('/registration', (req, res) => {
     let newUser = new User(req.body);
+    //newUser.validate().then(lol => console.log(lol)).catch(err => console.log(err, '@#@#@#@#'))
     newUser.save()
         .then(user => {
             let newVerificationToken = new VerificationToken({_id: user.id});
@@ -104,7 +106,7 @@ router.get('/verify/:token', (req, res, next) => {
 })
 
 router.get('/reset-password', (req, res) => {
-    res.render(`${req.theme}/client/templates/users/reset-password`, load.language(req.language, 'client/users/reset-password'))
+    res.render(`${req.theme}/client/users/reset-password`, load.language(req.language, 'client/users/reset-password'))
 })
 
 router.post('/reset-password', (req, res) => {
@@ -136,7 +138,7 @@ router.route('/reset-password/:token')
         .catch(err => next(err));
 })
 .get((req, res) => {
-    res.render(`${req.theme}/client/templates/users/set-new-password`, load.language(req.language, 'client/users/set-new-password'))
+    res.render(`${req.theme}/client/users/set-new-password`, load.language(req.language, 'client/users/set-new-password'))
 })
 .put((req, res) => {
     req.token.use(req.body.newpassword)
@@ -183,7 +185,7 @@ router.get('/profile/:username', (req, res) => {
     user.created = lacaleDate.format(user.created);
     res.locals.profile = load.language(req.language, 'client/users/profile');
     res.locals.title = `${res.locals.profile.title} ${user.username}`; 
-    res.render(`${req.theme}/client/templates/users/profile`, {
+    res.render(`${req.theme}/client/users/profile`, {
         user,
         owner: req.session.user === req.user.id,
         userProperties: load.language(req.language, 'models/user/properties'),
@@ -194,7 +196,7 @@ router.get('/profile/:username/edit', (req, res, next) => {
     res.locals.edit = load.language(req.language, 'client/users/profile-edit');
     res.locals.title = res.locals.edit.title;
     if (req.user.id === req.session.user) {
-        res.render(`${req.theme}/client/templates/users/profile-edit`, {
+        res.render(`${req.theme}/client/users/profile-edit`, {
             userProperties: load.language(req.language, 'models/user/properties'),
             user: req.user
         });

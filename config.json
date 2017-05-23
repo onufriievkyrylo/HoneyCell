@@ -6,9 +6,5 @@
     "session": {
         "secret": "Adipisicing amet eu anim ipsum excepteur duis dolore.",
         "maxAge": 43200000
-    },
-    "smtp": {
-        "user": "kyrylo.onufriiev@gmail.com",
-        "pass": "21071997"
     }
 }

@@ -13,27 +13,6 @@ const express = require('express'),
 //for(let module of modules)
 //    router.use('/', require(`${languagePath}/${module}`));
 
-//admin cheker
-
-router.use((req, res, next) => {
-    if (req.path == '/login')
-        next();
-    else if(req.session.admin)
-        User.findById(req.session.admin)
-            .then(admin => {
-                if (admin && admin.role == 'admin'){
-                    req.admin = admin;
-                    next();
-                } else {
-                    delete req.session.admin
-                    res.redirect('/admin/login');
-                }
-            })
-            .catch(err => next(err));
-    else
-        res.redirect('/admin/login');
-})
-
 //settings loader
 router.use((req, res, next) => {
     Settings.get('general localization theme')
@@ -48,23 +27,13 @@ router.use((req, res, next) => {
         .catch(err => next(err));
 })
 
-router.route('/login')
-.all((req, res, next) => {
-    if (req.session.admin)
-        res.redirect('/admin');
-    else
-        next();
-})
-.get((req, res) => {
-    res.render(`${req.theme}/admin/templates/login`, load.language(req.language, 'admin/login'));
-})
-.post((req, res) => {
+router.post('/login', (req, res) => {
     User.login(req.body.username, req.body.password)
         .then(user => {
             if (user.role == 'admin') {
                 req.session.cookie.path = '/admin';
                 req.session.cookie.maxAge = 1 * 60 * 60 * 1000;
-                req.session.admin = user._id;
+                req.session.admin = user.id;
                 res.status(200).send();
             } else
                 res.status(401).send();
@@ -77,11 +46,29 @@ router.route('/login')
         });
 })
 
+//admin cheker
+router.use((req, res, next) => {
+    if(req.session.admin)
+        User.findById(req.session.admin)
+            .then(admin => {
+                if (admin && admin.role == 'admin'){
+                    res.locals.admin = admin;
+                    res.locals.common = load.language(req.language, 'admin/common');
+                    next();
+                } else {
+                    delete req.session.admin
+                    res.render(`${req.theme}/admin/login`, load.language(req.language, 'admin/login'));
+                }
+            })
+            .catch(err => next(err));
+    else
+        res.render(`${req.theme}/admin/login`, load.language(req.language, 'admin/login'));
+})
+
 router.get('/', (req, res, next) => {
-    res.locals.panel = load.language(req.language, 'admin/panel');
-    res.locals.title = res.locals.panel.title;
-    res.render(`${req.theme}/admin/templates/panel`, {
-        admin: req.admin
+    res.locals.title = 'title? AdMiN PaNeL';
+    res.render(`${req.theme}/admin/panel`, {
+
     });
 })
 
@@ -90,38 +77,73 @@ router.post('/logout', (req, res) => {
     res.status(200).send();
 })
 
-router.get('/users', (req, res, next) => {
-    User.find()
-        .then(users => {
-            let localeDate = new Intl.DateTimeFormat(req.language, Object.assign(req.dateformat , req.timeformat));
-            users = users.reduce((acc, curr, i) => {
-                acc[i] = curr.toObject();
-                acc[i].created = localeDate.format(acc[i].created);
-                return acc;
-            }, []);
-            res.locals.list = load.language(req.language, 'admin/users/list');
-            res.locals.title = res.locals.list.title;
-            res.render(`${req.theme}/admin/templates/users/list`, {
-                userProperties: load.language(req.language, 'models/user/properties'),
-                users
-            })
+router.route('/users')
+.delete((req, res, next) => {
+    User.remove({username: req.body.username})
+        .then(user => res.status(200).send())
+        .catch(err => next(err));
+})
+.all((req, res, next) => {
+    console.log(req.query.search)
+    req.query.length = parseInt(req.query.length)
+    req.query.length = req.query.length > 0 ? req.query.length : 10
+    req.query.page = parseInt(req.query.page) || 1
+    User.count()
+        .then(count => {
+            req.pagetotal = Math.ceil(count / req.query.length);
+            req.query.page = req.query.page > req.pagetotal ? 1 : req.query.page;
+            return User.find()
+                .sort(req.query.sort)
+                .skip(req.query.length * (req.query.page - 1))
+                .limit(req.query.length)
+                .then(users => {
+                    let localeDate = new Intl.DateTimeFormat(req.language, Object.assign(req.dateformat , req.timeformat));
+                    req.users = users.reduce((acc, curr, i) => {
+                        acc[i] = curr.toObject();
+                        acc[i].created = localeDate.format(acc[i].created);
+                        return acc;
+                    }, []);
+                    next();
+                })
         })
         .catch(err => next(err));
 })
-
-router.delete('/users', (req, res) => {
-    User.remove({username: req.body.username})
-        .then(user => res.status(200).send())
-        .catch(err => {
-            console.log(err);
-            res.status(err.code || 500).send();
-        });
+.get((req, res) => {
+    res.locals.list = load.language(req.language, 'admin/users/list');
+    res.locals.title = res.locals.list.title;
+    res.locals.table = {
+        pagetotal: req.pagetotal,
+        length: req.query.length,
+        page: req.query.page,
+        sort: {
+            direction: req.query.sort && req.query.sort[0] == '-'? 'descending' : 'ascending',
+            column: req.query.sort ? req.query.sort.replace(/^-/, '') : 'created'
+        }
+    }
+    res.render(`${req.theme}/admin/users/list`, {
+        userProperties: load.language(req.language, 'models/user/properties'),
+        users: req.users
+    })
+})
+.post((req, res) => {
+    res.status(200).json({
+        users: req.users,
+        table: {
+            pagetotal: req.pagetotal,
+            length: req.query.length,
+            page: req.query.page,
+            sort: {
+                direction: req.query.sort && req.query.sort[0] == '-'? 'descending' : 'ascending',
+                column: req.query.sort ? req.query.sort.replace(/^-/, '') : 'created'
+            }
+        }
+    });
 })
 
 router.get('/users/add', (req, res) => {
     res.locals.add = load.language(req.language, 'admin/users/add');
     res.locals.title = res.locals.add.title;
-    res.render(`${req.theme}/admin/templates/users/add`, {
+    res.render(`${req.theme}/admin/users/add`, {
         userProperties: load.language(req.language, 'models/user/properties')
     });
 })
@@ -156,7 +178,7 @@ router.route('/users/edit/:username')
 .get((req, res) => {
     res.locals.edit = load.language(req.language, 'admin/users/edit');
     res.locals.title = res.locals.edit.title;
-    res.render(`${req.theme}/admin/templates/users/edit`, {
+    res.render(`${req.theme}/admin/users/edit`, {
         userProperties: load.language(req.language, 'models/user/properties'),
         user: req.user
     });
@@ -182,7 +204,7 @@ router.get('/settings-general', (req, res, next) => {
         .then(settings => {
             res.locals.general = load.language(req.language, 'admin/settings/general');
             res.locals.title = res.locals.general.title;
-            res.render(`${req.theme}/admin/templates/settings/general`, {
+            res.render(`${req.theme}/admin/settings/general`, {
                 settingsProperties: load.language(req.language, 'models/settings/properties'),
                 settings: settings.general
             });
@@ -199,7 +221,7 @@ router.get('/settings-localization', (req, res, next) => {
             res.locals.timeformat = req.timeformat;
             res.locals.locale = req.language;
             settings.localization.languages.all = Utils.languages;
-            res.render(`${req.theme}/admin/templates/settings/localization`, {
+            res.render(`${req.theme}/admin/settings/localization`, {
                 settingsProperties: load.language(req.language, 'models/settings/properties'),
                 settings: settings.localization
             });
@@ -217,7 +239,7 @@ router.put('/settings', (req, res, next) => {
             res.locals.dateformat = req.dateformat;
             res.locals.timeformat = req.timeformat;
             res.locals.locale = req.language;
-            res.render(`${req.theme}/admin/templates/settings/localization`, {
+            res.render(`${req.theme}/admin/settings/localization`, {
                 settingsProperties: load.language(req.language, 'models/settings/properties'),
                 settings: settings.localization
             });
@@ -258,7 +280,7 @@ router.route('/pages/add')
         .then(components => {
             res.locals.add = load.language(req.language, 'admin/pages/add');
             res.locals.title = res.locals.add.title;
-            res.render(`${req.theme}/admin/templates/pages/add`, {
+            res.render(`${req.theme}/admin/pages/add`, {
                 components,
                 pageProperties: load.language(req.language, 'models/pages/properties')
             })

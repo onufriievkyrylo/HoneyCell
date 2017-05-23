@@ -1,6 +1,7 @@
-extends admin/templates/layouts/main
+extends admin/layouts/simple
 
 block content
-  h1= `${message} : ${code}` 
-  h2= error.status
-  pre #{error.stack}
+  .sixteen.wide.column
+    h1= `${message} : ${code}`
+    h2= error.status
+    pre #{error.stack}
